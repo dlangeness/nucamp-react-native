@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { ScrollView, Text, FlatList } from "react-native";
 import { Card, ListItem } from "react-native-elements";
-import { render } from "react-dom";
 import { PARTNERS } from "../shared/partners";
 
 function Mission(props) {
@@ -52,13 +51,6 @@ class About extends Component {
             renderItem={renderPartner}
             keyExtractor={(item) => item.id.toString()}
           />
-          return (
-          <FlatList
-            data={this.state.campsites}
-            renderItem={renderDirectoryItem}
-            keyExtractor={(item) => item.id.toString()}
-          />
-          );
         </Card>
       </ScrollView>
     );
