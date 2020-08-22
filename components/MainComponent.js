@@ -158,26 +158,24 @@ const ReservationNavigator = createStackNavigator(
 
 const FavoritesNavigator = createStackNavigator(
   {
-    Favorites: { screen: Favorites },
+    Favorites: { screen: Favorites }
   },
   {
     navigationOptions: ({ navigation }) => ({
       headerStyle: {
-        backgroundColor: "#5637DD",
+        backgroundColor: '#5637DD'
       },
-      headerTintColor: "#fff",
+      headerTintColor: '#fff',
       headerTitleStyle: {
-        color: "#fff",
+        color: '#fff'
       },
-      headerLeft: (
-        <Icon
-          name="heart"
-          type="font-awesome"
-          iconStyle={styles.stackIcon}
-          onPress={() => navigation.toggleDrawer()}
-        />
-      ),
-    }),
+      headerLeft: <Icon
+        name='heart'
+        type='font-awesome'
+        iconStyle={styles.stackIcon}
+        onPress={() => navigation.toggleDrawer()}
+      />
+    })
   }
 );
 
@@ -259,9 +257,14 @@ const MainNavigator = createDrawerNavigator(
       navigationOptions: {
         drawerLabel: 'My Favorites',
         drawerIcon: ({ tintColor }) => (
-          <Icon name="heart" type="font-awesome" size={24} color={tintColor} />
-        ),
-      },
+          <Icon
+            name='heart'
+            type='font-awesome'
+            size={24}
+            color={tintColor}
+          />
+        )
+      }
     },
   },
   {

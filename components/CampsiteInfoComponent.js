@@ -1,18 +1,15 @@
 import React, { Component } from "react";
 import {
-  Text,
-  View,
-  ScrollView,
-  FlatList,
-  Modal,
-  Button,
-  StyleSheet,
-} from "react-native";
-import { Card, Icon, Rating, Input, TextInput } from "react-native-elements";
+  Text, View, ScrollView, FlatList,
+  Modal, Button, StyleSheet,
+  Alert, PanResponder
+} from 'react-native';
+import { Card, Icon, Rating, Input } from "react-native-elements";
 import { connect } from "react-redux";
 import { baseUrl } from "../shared/baseUrl";
 import { postFavorite, postComment } from "../redux/ActionCreators";
-import { CAMPSITES_FAILED, COMMENTS_FAILED } from "../redux/ActionTypes";
+import * as Animatable from "react-native-animatable";
+
 
 const mapStateToProps = (state) => {
   return {
@@ -24,44 +21,80 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = {
   postFavorite: (campsiteId) => postFavorite(campsiteId),
-  postComment: (campsiteId, rating, author, text) => postComment(campsiteId, rating, author, text)
+  postComment: (campsiteId, rating, author, comment) => (postComment(campsiteId, rating, author, comment))
 };
 
 function RenderCampsite(props) {
+
   const { campsite } = props;
+
+  const recognizeDrag = ({ dx }) => (dx < -200) ? true : false;
+
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onPanResponderEnd: (e, gestureState) => {
+      console.log('pan responder end', gestureState);
+      if (recognizeDrag(gestureState)) {
+        Alert.alert(
+          'Add Favorite',
+          'Are you sure you wish to add ' + campsite.name + ' to favorites?',
+          [
+            {
+              text: 'Cancel',
+              style: 'cancel',
+              onPress: () => console.log('Cancel Pressed')
+            },
+            {
+              text: 'OK',
+              onPress: () => props.favorite ?
+                console.log('Already set as a favorite') : props.markFavorite()
+            }
+          ],
+          { cancelable: false }
+        );
+      }
+      return true;
+    }
+  });
 
   if (campsite) {
     return (
-      <Card
-        featuredTitle={campsite.name}
-        image={{ uri: baseUrl + campsite.image }}
-      >
-        <Text style={{ margin: 10 }}>{campsite.description}</Text>
-        <View style={styles.cardRow}>
-          <Icon
-            name={props.favorite ? "heart" : "heart-o"}
-            type="font-awesome"
-            color="#f50"
-            raised
-            reverse
-            onPress={() =>
-              props.favorite
-                ? console.log("Already set as a favorite")
-                : props.markFavorite()
-            }
-          />
-          <Icon
-            name="pencil"
-            type="font-awesome"
-            color="#5637DD"
-            raised
-            reversed
-            onPress={() => props.onShowModal()}            
-            style={styles.cardItem}
-          />
-        </View>
-      </Card>
-    );
+      <Animatable.View
+        animation='fadeInDown'
+        duration={2000}
+        delay={1000}
+        {...panResponder.panHandlers}>
+            <Card
+              featuredTitle={campsite.name}
+              image={{ uri: baseUrl + campsite.image }}
+            >
+              <Text style={{ margin: 10 }}>{campsite.description}</Text>
+              <View style={styles.cardRow}>
+                <Icon
+                  name={props.favorite ? "heart" : "heart-o"}
+                  type="font-awesome"
+                  color="#f50"
+                  raised
+                  reverse
+                  onPress={() =>
+                    props.favorite
+                      ? console.log("Already set as a favorite")
+                      : props.markFavorite()
+                  }
+                />
+                <Icon
+                  name="pencil"
+                  type="font-awesome"
+                  color="#5637DD"
+                  raised
+                  reversed
+                  onPress={() => props.onShowModal()}
+                  style={styles.cardItem}
+                />
+              </View>
+            </Card>
+          </Animatable.View>
+        );
   }
   return <View />;
 }
@@ -85,13 +118,15 @@ function RenderComments({ comments }) {
   };
 
   return (
-    <Card title="Comments">
-      <FlatList
-        data={comments}
-        renderItem={renderCommentItem}
-        keyExtractor={(item) => item.id.toString()}
-      />
-    </Card>
+    <Animatable.View animation="fadeInUp" duration={2000} delay={1000}>
+      <Card title="Comments">
+        <FlatList
+          data={comments}
+          renderItem={renderCommentItem}
+          keyExtractor={(item) => item.id.toString()}
+        />
+      </Card>
+    </Animatable.View>
   );
 }
 
@@ -99,13 +134,10 @@ class CampsiteInfo extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      campsites: CAMPSITES_FAILED,
-      comments: COMMENTS_FAILED,
-      favorite: false,
       showModal: false,
       rating: 5,
       author: "",
-      text: ""
+      comment: ""
     };
   }
 
@@ -114,15 +146,15 @@ class CampsiteInfo extends Component {
   }
 
   handleComment(campsiteId) {
-    this.state.postComment(campsiteId, rating, author, text);
     this.toggleModal();
+    this.props.postComment(campsiteId, this.state.rating, this.state.author, this.state.comment);
   }
 
   resetForm() {
     this.setState({
       rating: 3,
-      Author: "",
-      Comment: "",
+      author: "",
+      comment: "",
       showModal: false
     });
   }
