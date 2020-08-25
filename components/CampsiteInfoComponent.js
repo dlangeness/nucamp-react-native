@@ -1,9 +1,16 @@
 import React, { Component } from "react";
 import {
-  Text, View, ScrollView, FlatList,
-  Modal, Button, StyleSheet,
-  Alert, PanResponder
-} from 'react-native';
+  Text,
+  View,
+  ScrollView,
+  FlatList,
+  Modal,
+  Button,
+  StyleSheet,
+  Alert,
+  PanResponder,
+  Share,
+} from "react-native";
 import { Card, Icon, Rating, Input } from "react-native-elements";
 import { connect } from "react-redux";
 import { baseUrl } from "../shared/baseUrl";
@@ -66,45 +73,65 @@ function RenderCampsite(props) {
     }
   });
 
+  const shareCampsite = (title, message, url) => {
+    Share.share({
+      title, 
+      message: `${title}: ${message} ${url}`,
+      url
+    }, {
+      dialogTitle: 'Share ' + title
+    });
+  };
+
   if (campsite) {
     return (
       <Animatable.View
-        animation='fadeInDown'
+        animation="fadeInDown"
         duration={2000}
         delay={1000}
         ref={view}
-        {...panResponder.panHandlers}>
-            <Card
-              featuredTitle={campsite.name}
-              image={{ uri: baseUrl + campsite.image }}
-            >
-              <Text style={{ margin: 10 }}>{campsite.description}</Text>
-              <View style={styles.cardRow}>
-                <Icon
-                  name={props.favorite ? "heart" : "heart-o"}
-                  type="font-awesome"
-                  color="#f50"
-                  raised
-                  reverse
-                  onPress={() =>
-                    props.favorite
-                      ? console.log("Already set as a favorite")
-                      : props.markFavorite()
-                  }
-                />
-                <Icon
-                  name="pencil"
-                  type="font-awesome"
-                  color="#5637DD"
-                  raised
-                  reversed
-                  onPress={() => props.onShowModal()}
-                  style={styles.cardItem}
-                />
-              </View>
-            </Card>
-          </Animatable.View>
-        );
+        {...panResponder.panHandlers}
+      >
+        <Card
+          featuredTitle={campsite.name}
+          image={{ uri: baseUrl + campsite.image }}
+        >
+          <Text style={{ margin: 10 }}>{campsite.description}</Text>
+          <View style={styles.cardRow}>
+            <Icon
+              name={props.favorite ? "heart" : "heart-o"}
+              type="font-awesome"
+              color="#f50"
+              raised
+              reverse
+              onPress={() =>
+                props.favorite
+                  ? console.log("Already set as a favorite")
+                  : props.markFavorite()
+              }
+            />
+            <Icon
+              name="pencil"
+              type="font-awesome"
+              color="#5637DD"
+              raised
+              reversed
+              onPress={() => props.onShowModal()}
+              style={styles.cardItem}
+            />
+            <Icon
+              name={"share"}
+              type="font-awesome"
+              color="#5637DD"
+              style={styles.cardItem}
+              raised
+              reversed
+              onPress={() => shareCampsite(campsite.name, campsite.description, baseUrl + campsite.image)}
+            />
+          </View>
+        </Card>
+      </Animatable.View>
+    );
   }
   return <View />;
 }
